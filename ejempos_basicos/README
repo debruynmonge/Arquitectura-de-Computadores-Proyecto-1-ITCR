@@ -1,0 +1,8 @@
+Para installar nasm:
+    sudo apt-get install nasm
+Para compilar el código:
+   nasm -f elf64 -o hello.o hello.asm
+Para linkear el código:
+   ld hello.o -o hello
+Para correrlo:
+   ./hello 
