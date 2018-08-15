@@ -1,2 +1,2 @@
-# Arquitectura-de-Computares
-Carpeta para proyectos del Curso Arquitectura de Computadores ITCR
+# Arquitectura-de-Computares-Proyecto-1
+Carpeta para el primer proyecto del Curso Arquitectura de Computadores ITCR
