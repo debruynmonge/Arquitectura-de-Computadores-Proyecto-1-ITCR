@@ -70,7 +70,8 @@ section .text
                 mov [tdgn], ax
                 print tdgn
 		;leyendo Escala del gráfico
-                mov ax,[textconf+105] ; almacena en ax el contenido de la direc$
+                mov ax,[textconf+105
+] ; almacena en ax el contenido de la direc$
                 mov [edg], ax   ; almacena en edg el contenido de ax
                 print edg
 		;leyendo Tipo de Ordenamiento
