@@ -82,7 +82,7 @@ section .text
 
 
 	;imprimir  archivo de datos
-		print [textdat]
+		print textdat
 
 
 
