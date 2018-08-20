@@ -8,12 +8,6 @@ archdat db "archivo.txt",0		;nombre del archivo con los datos
 textordnotas db "--------El archivo a sido ordenado--------/n----------de acuerdo a las notas obtenidas-----------",0
 textordalfa db "--------El archivo a sido ordenado--------/n----------Por orden alfabetico-----------",0
 voyaqui db "voy por aqui",10
-iguales db "son iguales",10
-f1esmenor db "f1 es menor",10
-f1esmayor db "f1 es mayor",10
-
-
-
 ttc equ 140    ;almacena ttc= tamaño de texto de configuracion
 ttd equ 900	; almacena tad =tamaño de texto con datos
 contadorfilas db 0d
@@ -25,7 +19,7 @@ textconf resb 140 ; Guarda el archivo de texto del configuracion
 textdat resb 900  ;Guarda el archivo de texto con los datos
 numcolum resb 2	  ; Almacena el  numero de columnas del Histograma
 numfil resb 2	 ; Almacena el numero de filas del histograma
-copiatextdat resb 900  ;Guarda una copia del archivo de texto para poder ordenarlo
+
 ;Las siguientes variables pertenecen a informacion del archivo configuracion
 	nda resb 3 ;esta variable almacena la nda= nota de aprobacion
 	ndr resb 3 ;esta variabla almacena la ndr = nota de  reposicion
@@ -39,8 +33,6 @@ copiatextdat resb 900  ;Guarda una copia del archivo de texto para poder ordenar
 	finalf1 resb 2
 	finalf2 resb 2
 	byteactual resb 2
-	var1 resb 1
-	var2 resb 1
 
 section .text
 	global _start
@@ -127,18 +119,19 @@ bublesort1:
 		jne filaceroNO
 		;--------fila cero Si--------
 		mov word [iniciof1],0d
-		mov word [byteactual],0d
+		mov byte [byteactual],0d
 		jmp lugarbyte
 filaceroNO:   mov word ax,[iniciof2]
 		mov word [iniciof1],ax
 
-lugarbyte:	mov word ax, [byteactual]   ;carga en ax  el byte actual
+lugarbyte:	mov byte al, [byteactual]   ;carga en al  el byte actual
 		cmp byte [textdat+rax],10d  ; es el byte actual igual a enter
 		je Efinalf1
 		;incrementa en 1 el byte actual
-		mov word ax, [byteactual]
+		mov  ax, [byteactual]
 		inc ax
 		mov word [byteactual],ax
+print byteactual
 		jmp lugarbyte
 
 
@@ -156,83 +149,34 @@ Efinalf1:	 mov word ax,[byteactual] ; almacena el byte donde finaliza la fila 1
 
 		;Comparar el byte actual para saber si es un enter
 lugarbyte2:	mov word ax, [byteactual]    ;almacena en ax el byte actual
-		cmp  byte [textdat+rax],10d   ;compara si el byte actual es un enter
+		cmp  word ax,10d   ;compara si el byte actual es un enter
 		je Efinalf2
 		;se incrementa en 1 el byte actual
 		inc ax
 		mov word [byteactual],ax
+
 		jmp lugarbyte2
 Efinalf2:
 		;Almacenando la direccion del final de la fila f2
 		mov word ax, [byteactual]
 		inc ax
 		mov word [finalf2],ax
-		;-----------Determina el tipo de ordenamiento---------------
+
+
+
+
+
 		cmp word [tdo], 97d  ; compara si el tipo de ordenamiento comienza con a de alfabetico
 		je ordenalfa
 		print textordnotas
 
-
-
-
-		;---------------------ordenamiento por notas-----------------
+		;ordenamiento por notas
 		;Paso 1 Leer el la fila e identificar donde comienza y donde ter
 
 
 		jmp finordenamiento
 		; ordenamiento alfabetico
-
-
-
-
 ordenalfa: print textordalfa
-		mov word ax,[iniciof1] ;almacena en al los byte de inicio de la fila 1
-		mov word bx,[iniciof2] ;almacena en bl el byte de inicio de la fila 2
-		mov byte cl, [textdat+rax] ;carga en cl el dato en la fila 1
-		mov byte dl, [textdat+rbx] ;carga en dl el dato en fila 2
-		mov byte [var1],cl
-		mov byte [var2],dl
-		print var1
-		print var2
-
-
-		;Determinando si el la letra de la fila 1 es mayor que la letra de la fila 2
-		;f1>f2
-comparacion:	cmp byte cl,dl
-		jg f1mayorf2
-		jl f1menorf2
-		;Ambas letras son iguales, se incrementea
-		; el bit de inicio de ambas filas
-		;incrementando byte de inicio fila 1
-		mov word ax, [iniciof1]
-		inc ax
-		mov word [iniciof1],ax
-		;incrementando byte de inicio fila 2
-		mov word ax,[iniciof2]
-		inc ax
-		mov word [iniciof2],ax
-		print iguales
-		jmp ordenalfa  ;salta al inicio de las comparaciones
-
-	;Caso cuando  f1 mayor a f2
-f1mayorf2:
-		print f1esmayor
-
-	jmp deterPosiArch
-	;Caso cuando f1 menor que f2
-f1menorf2:
-	print f1esmenor
-
-
-
-deterPosiArch:
-
-
-
-
-
-
-
 
 
 finordenamiento:
@@ -247,6 +191,10 @@ finordenamiento:
 		print tdgn
 		print edg
 		print tdo
+print voyaqui
+
+
+
 
 
 

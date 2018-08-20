@@ -8,12 +8,6 @@ archdat db "archivo.txt",0		;nombre del archivo con los datos
 textordnotas db "--------El archivo a sido ordenado--------/n----------de acuerdo a las notas obtenidas-----------",0
 textordalfa db "--------El archivo a sido ordenado--------/n----------Por orden alfabetico-----------",0
 voyaqui db "voy por aqui",10
-iguales db "son iguales",10
-f1esmenor db "f1 es menor",10
-f1esmayor db "f1 es mayor",10
-
-
-
 ttc equ 140    ;almacena ttc= tamaño de texto de configuracion
 ttd equ 900	; almacena tad =tamaño de texto con datos
 contadorfilas db 0d
@@ -151,6 +145,7 @@ Efinalf1:	 mov word ax,[byteactual] ; almacena el byte donde finaliza la fila 1
 
 		;Establecer el inicio de la fila 2
 		inc ax
+		inc ax
 		mov word [iniciof2],ax
 		mov word [byteactual],ax
 
@@ -159,7 +154,7 @@ lugarbyte2:	mov word ax, [byteactual]    ;almacena en ax el byte actual
 		cmp  byte [textdat+rax],10d   ;compara si el byte actual es un enter
 		je Efinalf2
 		;se incrementa en 1 el byte actual
-		inc ax
+		inc  ax
 		mov word [byteactual],ax
 		jmp lugarbyte2
 Efinalf2:
@@ -186,8 +181,8 @@ Efinalf2:
 
 
 ordenalfa: print textordalfa
-		mov word ax,[iniciof1] ;almacena en al los byte de inicio de la fila 1
-		mov word bx,[iniciof2] ;almacena en bl el byte de inicio de la fila 2
+		mov byte al,[iniciof1] ;almacena en al el byte de inicio de la fila 1
+		mov byte bl,[iniciof2] ;almacena en bl el byte de inicio de la fila 2
 		mov byte cl, [textdat+rax] ;carga en cl el dato en la fila 1
 		mov byte dl, [textdat+rbx] ;carga en dl el dato en fila 2
 		mov byte [var1],cl
@@ -199,7 +194,7 @@ ordenalfa: print textordalfa
 		;Determinando si el la letra de la fila 1 es mayor que la letra de la fila 2
 		;f1>f2
 comparacion:	cmp byte cl,dl
-		jg f1mayorf2
+		ja f1mayorf2
 		jl f1menorf2
 		;Ambas letras son iguales, se incrementea
 		; el bit de inicio de ambas filas
@@ -211,21 +206,19 @@ comparacion:	cmp byte cl,dl
 		mov word ax,[iniciof2]
 		inc ax
 		mov word [iniciof2],ax
-		print iguales
 		jmp ordenalfa  ;salta al inicio de las comparaciones
 
 	;Caso cuando  f1 mayor a f2
 f1mayorf2:
-		print f1esmayor
 
-	jmp deterPosiArch
+
+	jmp determinaPosicionArchivo
 	;Caso cuando f1 menor que f2
 f1menorf2:
-	print f1esmenor
 
 
 
-deterPosiArch:
+determinaPosicionArchivo:
 
 
 
