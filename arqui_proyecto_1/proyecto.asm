@@ -7,16 +7,17 @@ archconf db "configuracion.txt",0	;nombre del archivo con texto
 archdat db "archivo.txt",0		;nombre del archivo con los datos
 textordnotas db "--------El archivo a sido ordenado--------/n----------de acuerdo a las notas obtenidas-----------",0
 textordalfa db "--------El archivo a sido ordenado--------/n----------Por orden alfabetico-----------",0
-voyaqui db "voy por aqui",10
-iguales db "son iguales",10
-f1esmenor db "f1 es menor",10
-f1esmayor db "f1 es mayor",10
+voyaqui db "voy por aqui",0
+iguales db "son iguales",0
+f1esmenor db "f1 es menor",0
+f1esmayor db "f1 es mayor",0
 
 
 
 ttc equ 140    ;almacena ttc= tamaño de texto de configuracion
 ttd equ 900	; almacena tad =tamaño de texto con datos
 contadorfilas db 0d
+byteactualcopia dw 0d
 
 section .bss
 ;aqui se definen las variables no inicializadas
@@ -25,7 +26,7 @@ textconf resb 140 ; Guarda el archivo de texto del configuracion
 textdat resb 900  ;Guarda el archivo de texto con los datos
 numcolum resb 2	  ; Almacena el  numero de columnas del Histograma
 numfil resb 2	 ; Almacena el numero de filas del histograma
-copiatextdat resb 900  ;Guarda una copia del archivo de texto para poder ordenarlo
+textdatcopia resb 100  ;Guarda una copia del archivo de texto para poder ordenarlo
 ;Las siguientes variables pertenecen a informacion del archivo configuracion
 	nda resb 3 ;esta variable almacena la nda= nota de aprobacion
 	ndr resb 3 ;esta variabla almacena la ndr = nota de  reposicion
@@ -41,6 +42,11 @@ copiatextdat resb 900  ;Guarda una copia del archivo de texto para poder ordenar
 	byteactual resb 2
 	var1 resb 1
 	var2 resb 1
+	byteiniciocopia1 resb 2
+	bytefinalcopia1 resb 2
+        byteiniciocopia2 resb 2
+        bytefinalcopia2 resb 2
+
 
 section .text
 	global _start
@@ -162,11 +168,13 @@ lugarbyte2:	mov word ax, [byteactual]    ;almacena en ax el byte actual
 		inc ax
 		mov word [byteactual],ax
 		jmp lugarbyte2
-Efinalf2:
-		;Almacenando la direccion del final de la fila f2
+
+Efinalf2:       ;Almacenando la direccion del final de la fila f2
 		mov word ax, [byteactual]
 		inc ax
 		mov word [finalf2],ax
+
+
 		;-----------Determina el tipo de ordenamiento---------------
 		cmp word [tdo], 97d  ; compara si el tipo de ordenamiento comienza con a de alfabetico
 		je ordenalfa
@@ -185,24 +193,27 @@ Efinalf2:
 
 
 
-ordenalfa: print textordalfa
-		mov word ax,[iniciof1] ;almacena en al los byte de inicio de la fila 1
-		mov word bx,[iniciof2] ;almacena en bl el byte de inicio de la fila 2
+ordenalfa: 	print textordalfa
+alfabetico:	mov word ax,[iniciof1] ;almacena en ax los byte de inicio de la fila 1
+		mov word bx,[iniciof2] ;almacena en bx los byte de inicio de la fila 2
 		mov byte cl, [textdat+rax] ;carga en cl el dato en la fila 1
 		mov byte dl, [textdat+rbx] ;carga en dl el dato en fila 2
 		mov byte [var1],cl
 		mov byte [var2],dl
-		print var1
-		print var2
+breakpoint:		print var1
+		;print var2
 
 
 		;Determinando si el la letra de la fila 1 es mayor que la letra de la fila 2
 		;f1>f2
 comparacion:	cmp byte cl,dl
 		jg f1mayorf2
-		jl f1menorf2
+		mov byte cl,[var1]
+		mov byte dl,[var2]
+		cmp byte cl,dl
+		jb f1menorf2
 		;Ambas letras son iguales, se incrementea
-		; el bit de inicio de ambas filas
+		; el byte de inicio de ambas filas
 		;incrementando byte de inicio fila 1
 		mov word ax, [iniciof1]
 		inc ax
@@ -212,20 +223,89 @@ comparacion:	cmp byte cl,dl
 		inc ax
 		mov word [iniciof2],ax
 		print iguales
-		jmp ordenalfa  ;salta al inicio de las comparaciones
+		jmp alfabetico  ;salta al inicio de las comparaciones
 
 	;Caso cuando  f1 mayor a f2
 f1mayorf2:
 		print f1esmayor
+		;Copiando la linea en orden
+                ;Almacenando la direccion en la nueva variable
+                ;Almacena el limite final de la fila que se va a copiar
+                mov word ax,[finalf2]
+                mov word [bytefinalcopia1],ax
+                ;Almacena el limite inicila de la fila que se va a copiar
+                mov word ax,[iniciof2]
+                mov word [byteiniciocopia1],ax
 
-	jmp deterPosiArch
+		;Almacenando la direccion en la nueva variable
+                ;Almacena el limite final de la fila que se va a copiar
+                mov word ax,[finalf1]
+                mov word [bytefinalcopia2],ax
+                ;Almacena el limite inicila de la fila que se va a copiar
+                mov word ax,[iniciof1]
+                mov word [byteiniciocopia2],ax
+
+
+		jmp copiarfila1
+
+
 	;Caso cuando f1 menor que f2
 f1menorf2:
-	print f1esmenor
+		print f1esmenor
+		;Copiando la linea en orden
+		;Almacenando la direccion en la nueva variable
+		;Almacena el limite final de la primer fila que se va a copiar
+		mov word ax,[finalf1]
+		mov word [bytefinalcopia1],ax
+		;Almacena el limite inicial de la fila que se va a copiar
+		mov word ax,[iniciof1]
+		mov word [byteiniciocopia1],ax
+
+
+		;Almacena el limite final de la segunda fila que se va a copiar
+                mov word ax,[finalf2]
+                mov word [bytefinalcopia2],ax
+                ;Almacena el limite inicial de la fila que se va a copiar
+                mov word ax,[iniciof2]
+                mov word [byteiniciocopia2],ax
 
 
 
-deterPosiArch:
+		print voyaqui ; hay un error en el copiado
+copiarfila1: ;copia la fila de acuerdo al orden
+		;copiando la primer fila
+		;Copia la letra actual de la fila
+		mov word bx, [byteiniciocopia1] ; carga desde donde va a copiar
+		mov word ax, [byteactualcopia]  ;carga la el espacio donde se va a colocar la copia
+		mov byte cl,[textdat+rbx]   ;extrae el dato a copiar
+		mov byte [textdatcopia+rax], cl  ;copia el dato en la otra variable
+
+		;incrementa en 1 el byte actual de la copia
+		mov word ax, [byteactualcopia]
+		inc rax
+		mov word [byteactualcopia],ax
+
+
+		;Incrementa en uno  el byte de inicio de la fila
+
+		;Comparaciones para salir del loop de copia fila
+		;Es igual al byte Final?
+		mov word ax, [byteactual]
+		cmp ax,[bytefinalcopia1]
+		jbe copiarfila1
+
+
+finalcopiarfila: print textdatcopia
+		;limpiar byteactualcopia al final de la copia
+		mov word [byteactualcopia],0d
+
+		;------------------------------Verificar que el contador de bytes sea menor que el final del archivo----------------
+		;mov word ax,[bytefinalcopia]		;error potencial... no estoy contando los bytes recorridos
+	; y cuando llego al final no se si copio la ultima fila
+		;cmp ax,ttd
+
+
+
 
 
 
