@@ -15,15 +15,16 @@ f1esmayor db "f1 es mayor",0
 
 
 ttc equ 140    ;almacena ttc= tamaño de texto de configuracion
-ttd equ 900	; almacena tad =tamaño de texto con datos
+ttd equ 950	; almacena tad =tamaño de texto con datos
 contadorfilas db 0d
 byteactualcopia dw 0d
+bubletimes dw 0d
 
 section .bss
 ;aqui se definen las variables no inicializadas
 
 textconf resb 140 ; Guarda el archivo de texto del configuracion
-textdat resb 900  ;Guarda el archivo de texto con los datos
+textdat resb 950  ;Guarda el archivo de texto con los datos
 numcolum resb 2	  ; Almacena el  numero de columnas del Histograma
 numfil resb 2	 ; Almacena el numero de filas del histograma
 textdatcopia resb 150  ;Guarda una copia del archivo de texto para poder ordenarlo
@@ -198,7 +199,7 @@ Efinalf2:       ;Almacenando la direccion del final de la fila f2
 
 
 
-ordenalfa: 	print textordalfa
+ordenalfa:
 		;guardar el inicio general de la linea
                 mov word r8w,[iniciof1]
                 mov word [linea1], r8w
@@ -213,7 +214,7 @@ alfabetico:	mov word ax,[iniciof1] ;almacena en ax los byte de inicio de la fila
 		mov byte dl, [textdat+rbx] ;carga en dl el dato en fila 2
 		mov byte [var1],cl
 		mov byte [var2],dl
-		print var1
+		;print var1
 		;print var2
 
 prueba1:
@@ -222,12 +223,14 @@ prueba1:
 
 		;Determinando si el la letra de la fila 1 es mayor que la letra de la fila 2
 		;f1>f2
-comparacion:	cmp byte cl,dl
+comparacion:	mov byte cl, [var1]
+		mov byte dl, [var2]
+		cmp byte cl,dl
 		jg f1mayorf2
 		mov byte cl,[var1]
 		mov byte dl,[var2]
-		cmp byte cl,dl
-		jb f1menorf2
+		cmp byte dl,cl
+		jg f1menorf2
 		;Ambas letras son iguales, se incrementea
 		; el byte de inicio de ambas filas
 		;incrementando byte de inicio fila 1
@@ -238,12 +241,10 @@ comparacion:	cmp byte cl,dl
 		mov word ax,[iniciof2]
 		inc ax
 		mov word [iniciof2],ax
-		print iguales
 		jmp alfabetico  ;salta al inicio de las comparaciones
 
 	;Caso cuando  f1 mayor a f2
 f1mayorf2:
-		print f1esmayor
 		;Copiando la linea en orden
                 ;Almacenando la direccion en la nueva variable
                 ;Almacena el limite final de la fila que se va a copiar
@@ -267,7 +268,7 @@ f1mayorf2:
 
 	;Caso cuando f1 menor que f2
 f1menorf2:
-		print f1esmenor
+
 		;Copiando la linea en orden
 		;Almacenando la direccion en la nueva variable
 		;Almacena el limite final de la primer fila que se va a copiar
@@ -289,15 +290,6 @@ f1menorf2:
 
 
 
-mov word r8w ,[byteiniciocopia1]
-mov word r9w,[bytefinalcopia1]
-mov word r10w ,[byteiniciocopia2]
-mov word r11w,[bytefinalcopia2]
-
-
-
-
-prueba:
 
 
 
@@ -314,18 +306,6 @@ copiarfilas:
 
 
 
-mov word r8w ,[byteiniciocopia1]
-mov word r9w,[bytefinalcopia1]
-mov word r10w ,[byteiniciocopia2]
-mov word r11w,[bytefinalcopia2]
-mov word ax,[dif1] 
-
-
-
-prueba2:
-
-
-
 
 
 
@@ -338,7 +318,7 @@ copiaf1:	;Copiar  el dato
 
 
 
-		;Incrementar el byte acual copia 
+		;Incrementar el byte acual copia
 		mov word ax, [byteactualcopia]
 		inc ax
 		mov word [byteactualcopia],ax
@@ -354,7 +334,9 @@ copiaf1:	;Copiar  el dato
 		mov word [dif1], ax
 		cmp ax, [bytefinalcopia1]; compara dif y el bytefinalcopia1
 		jb copiaf1
-print textdatcopia
+
+
+
 
 		;Calcular diferencia 2
 		mov word ax,[bytefinalcopia2]
@@ -365,10 +347,6 @@ print textdatcopia
 		mov word [dif1],ax
 
 
-;---------------hasta aqui todo bien------------------------
-;--------Me falta agregar enter entre las lineas copiadas y al final de la segunda linea
-
-
 copiaf2:        ;Copiar  el dato
                 mov word bx, [byteiniciocopia2] ;cargar numero de byte a copiar
                 mov byte al,[textdat+rbx]  ;extrer el byte a copiar
@@ -377,7 +355,7 @@ copiaf2:        ;Copiar  el dato
 
 
 
-                ;Incrementar el byte acual copia 
+                ;Incrementar el byte acual copia
                 mov word ax, [byteactualcopia]
                 inc ax
                 mov word [byteactualcopia],ax
@@ -394,22 +372,65 @@ copiaf2:        ;Copiar  el dato
                 mov word [dif1], ax
                 cmp ax, [bytefinalcopia2]; compara dif y el bytefinalcopia1
                 jb copiaf2
-print textdatcopia
+
+
+
+;-------------------Remplazar la copia en el archivo original------------------
+remplazo:
+	;cargar la direccion donde se va a sobre escribir
+		mov word bx,[linea1]
+	;cargar el hasta donde se va a sobrescribir
+		mov word cx,[finalf2]
+	;calcular el numero de bytes que hay que copiar
+		sub cx,bx
+		mov word [dif1],cx
+	;el regitro ax va a almacenar la cantidad de bytes ya copiados
+		mov word ax,0d
+traspaso:	;traspasar el dato
+		mov byte r13b,[textdatcopia+rax]
+		mov byte [textdat+rax],r13b
+		;incrementa ax
+		inc ax
+		;compara si ax llego al final de la copia
+		cmp word ax,[byteactualcopia]
+		jne traspaso
+
+;-----------limpiar byte de posicion en textdat copia---------------------
+                mov word [byteactualcopia],0d
+
+print textdat
+
+; Realiza el primer reamplazo de forma exitosa
+;-------------------------hasta aqui todo bien---------------------------
+
+
+finalcopiarfila:;------------------------------Verificar que el contador de bytes sea menor que el final del archivo----------------
+		;-------aqui abajo hay un error-------------------
+		mov word ax,[bytefinalcopia2]
+		cmp ax,ttd
+		jne bublesort1
 
 
 
 
 
 
-finalcopiarfila:
 
 
 
 
-		;------------------------------Verificar que el contador de bytes sea menor que el final del archivo----------------
-		;mov word ax,[bytefinalcopia]		;error potencial... no estoy contando los bytes recorridos
-	; y cuando llego al final no se si copio la ultima fila
-		;cmp ax,ttd
+
+
+
+		;mov word ax,[bubletimes]
+		;inc ax
+		;mov word [bubletimes],ax
+		;mov word bx,[contadorfilas]
+		;cmp ax,bx ;contadorfilas=bubletimes?
+		;mov word [contadorfilas],0d
+		;mov word [byteactual],0d
+		;print textdat
+		;jne bublesort1
 
 
 

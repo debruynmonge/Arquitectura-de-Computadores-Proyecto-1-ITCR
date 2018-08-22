@@ -1,3 +1,4 @@
+Juan Marin 54
 Jacobo DeBruyn Monge  90
 Juan 30
 María Jiménez 80
@@ -49,7 +50,8 @@ Tiger Woods 17
 Alí 97
 Arnold Schwarzenneger 86
 Michale Phelps 22
-Zisane 5
+Zidane 5
 Sergio Ramos 20
+ 
  
  
