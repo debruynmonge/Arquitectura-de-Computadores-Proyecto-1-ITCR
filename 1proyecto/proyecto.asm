@@ -15,7 +15,10 @@ iniciof2 dw 0d
 finalf2 dw 0d
 bytefinaltext dw 0d
 contadorletras dw 0d
+copiadorfilas dw 0d
 
+sizef1 dw 0d
+sizef2 dw 0d
 
 
 
@@ -128,6 +131,13 @@ bublesort:
         mov word bx,[byteactual]
 	mov byte al, [textdat +rbx ]
 
+	;Copiar letra actual en direccion copiafila1+copiadorfilas
+		mov word r10w,[copiadorfilas]
+		mov byte [copiafila1+r10],al
+
+	;incrementar copiador filas
+		inc word r10w
+		mov word [copiadorfilas],r10w
 
         ; Almacena  byteactual en final fila 1
                 mov word cx,[byteactual]
@@ -142,15 +152,29 @@ bublesort:
 		cmp byte al,10d ; compara letra actual
 		jne bublesort
 
+	;Guardar copiador filas en tamañofila 1
+		mov word r9w,[copiadorfilas]
+		mov word [sizef1],r9w
+
+	;limpiar copiador filas
+		mov word [copiadorfilas],0d
+
 	;Almacenar byte actual en inicio de fila 2
 		mov word [iniciof2],cx
 
+
 	; cargar letra actual
-
-Efila2:
-
-		mov word ax,[byteactual]
+Efila2:		mov word ax,[byteactual]
 		mov byte bl,[textdat+rax]
+
+	;Copiar letra actual en  direccion copiafila2+copiadorfilas
+		mov word r8w,[copiadorfilas]
+		mov byte [copiafila2+r8],bl
+
+	;incrementar copiador de filas
+		inc word r8w
+		mov word [copiadorfilas],r8w
+
 	;Almacenar en final fila 2 el byte actual
 		mov word [finalf2],ax
 	;Incrementar byte actual
@@ -161,10 +185,20 @@ Efila2:
 		jne Efila2
 	; es letra actual igual a final de texto
 		cmp byte bl, 03d
-		jne ordenamiento
+		jne antesdeordenamiento
 	;si es igual a final de texto almacena  el byte actual menos 1 en byte final de texto
 		dec ax
 		mov word [bytefinaltext],ax
+
+antesdeordenamiento:
+	;Guardar copiadorfila en tamaño de fila 2
+		mov word r8w,[copiadorfilas]
+		mov word [sizef2],r8w
+
+	;limpiar copiador filas
+		mov word [copiadorfilas],0d
+
+
 
 	;-----------------------ordenamiento---------------
 ordenamiento:
@@ -198,11 +232,13 @@ alfabetico:
 
 
 	;incrementar contador letras
-		mov  word dx,[contadorletras]
+		mov word dx,[contadorletras]
 		inc word dx
 		mov word [contadorletras],dx
 
 	;Es letra1 igual a letra2
+print letra1
+print letra2
 		mov byte al,[letra1]
 		mov byte bl,[letra2]
 		cmp byte al,bl
@@ -210,37 +246,91 @@ alfabetico:
 
 
 	;limpiar contador letras
-		mov byte [contadorletras],10d
+		mov byte [contadorletras],0d
+
+	;limpiar copiador letras
+		mov byte [copiadorfilas],0d
+
 
 	;es letra1 mayor a letra2?
-		jg  letra1mayor
+		jb  letra1mayor
 
 
 
 
 	;------------letra1 es menor a letra 2------------
-	;copiar fila 1
-menorcopiaf1:
+	; iniciof1=iniciof2
+		mov word r8w,[iniciof2]
+		mov word [iniciof1],r8w
 
-
-
-
-	;copiar fila 2
-menorcopiaf2:
-
-
-
-
-
+	;byteactual=iniciof2
+		mov word [byteactual],r8w
+print textdat
+	;Salto  a final del remplazo
+		jmp finaldelremplazo
 
 	;------------------------letra 1 es mayor que letra 2----------
 letra1mayor:
+	;copiar fila 2 en textdat
+	;cargar en al lo que esta en copiafila2+copiadorfilas
+		mov word bx,[copiadorfilas]
+		mov byte al,[copiafila2+rbx]
+
+	;Copiar al en direccion textdat+iniciof1+copiadorfilas
+		add word bx,[iniciof1]
+		mov byte [textdat+rbx],al
+
+	;incrementar copiador filas
+		mov word dx,[copiadorfilas]
+		inc word dx
+		mov word [copiadorfilas],dx
+
+	; Es copiador filas mayor a tamaño fila 2?
+		mov word ax,[sizef2]
+		cmp word dx,ax
+		jbe letra1mayor
+
+	;limpiar copiador filas
+		mov word [copiadorfilas],0d
+
+	;actualizar byte actual
+		inc ax
+		add ax,[iniciof1]
+		mov word [byteactual],ax
+
+copyf1: ;copiar fila 1
+	;Cargar en al lo que esta en copiafila1+copiadorfilas
+		mov word bx,[copiadorfilas]
+		mov byte al,[copiafila1+rbx]
+
+	;copiar al en direccion textdat+byteactual+copiadorfilas
+		add word bx,[byteactual]
+		mov byte al,[textdat+rbx]
+
+	;incrementar copiador filas
+		mov word bx,[copiadorfilas]
+		inc word bx
+		mov word [copiadorfilas],bx
+
+	; Es copiadorfilas mayor a tamañofila1?
+		mov word ax,[sizef1]
+		cmp word bx,ax
+		jbe copyf1
 
 
+	;Limpiar copiador de filas
+		mov word [copiadorfilas],0d
+
+	;iniciof1=byteactual
+		mov word ax,[byteactual]
+		mov word [iniciof1],ax
 
 
-remplazarfilas:
-
+finaldelremplazo:
+print voyaqui
+print textdat
+print copiafila1
+print copiafila2
 
 
 
