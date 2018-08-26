@@ -44,6 +44,7 @@ num1 resb 2
 num2 resb 2
 
 
+
 ;Las siguientes variables pertenecen a informacion del archivo configuracion
 	nda resb 3 ;esta variable almacena la nda= nota de aprobacion
 	ndr resb 2 ;esta variabla almacena la ndr = nota de  reposicion
@@ -546,7 +547,6 @@ limpiarnotas:
 		mov byte r9b,[cantx]
 		mov byte bl,[tdgnb]
 		mov byte [nota],0d
-; Error aqui---------------- no copia notas.------
 asignarnotas:
 		;calcular nota
 		;multiplicar tamaño por el contador
@@ -569,13 +569,74 @@ bp1:		mov byte [nota],al
 
 
 ;limpiar variable contador
+	mov byte [contadorfilas],0d
 	mov word [byteactual],0d
-;buscar notas en el archivo textdat
 
+findnotes:	;buscar notas en el archivo textdat
+		;detectar el enter
+		;la cantidad de enters detectados debe ser menor o igual bubletimes
+		;detectando enter
+		mov word bx,[byteactual]
+		mov byte al,[textdat+rbx]	;carga en al la letra actual
+		;incrementar el byte actual
+		add word bx,1d
+		mov word [byteactual],bx
+		;comprobar si la  letra es igual a enter
+		cmp byte al, 10d
+		jne findnotes
 
+		;encontro el enter
+		;incrementar contador filas
+		mov byte cl,[contadorfilas]
+		add byte cl,1d
+		mov byte [contadorfilas],cl
+		;carga el numero
+		;cargar unidades
+		mov word bx,[byteactual]
+		sub word bx,2d
+		mov byte al,[textdat+rbx]
+		mov byte [num1+1],al
+		;carga decenas
+		sub word bx,1d
+		mov byte al,[textdat+rbx]
+		cmp byte al,32	;es igual a un espacio?
+		jne nospace
+		mov byte al,48d
 
+nospace:	mov byte [num1],al
+		;convertir de ascii a decimal
+		mov  byte ah,[num1]
+		mov byte al,[num1+1]
+		call _wascii2dec
+	;en al se encuentra el numero en decimal
+	;buscar a que grupo pertenece
+	;dividir valor entre el tamaño de los grupos
+	;restar 1 al resutado
+	;verificar si el residuo es mayor a cero, de ser asi, se suma 1 al resultado
+	;esto da como resultado el grupo al que pertenece
+	mov  byte bl,[tdgnb]
+	div byte bl
+	mov byte ah,[residuox]
+	mov byte cl, al
+	cmp byte ah,0d
+	jne noresi
+	sub byte cl,1d
+	mov byte al,cl
+noresi:;buscar el grupo al que pertenece el numero y sumarle 1
+		mov byte bl,[arrayestudiantes+rax]
+		add byte bl, 1d
+		mov byte [arrayestudiantes+rax],bl
+
+;verificar si ya se contaron todos las notas
+;es bubbletimes menor que contadorfilas
+		mov byte al,[bubletimes]
+		cmp  byte al,[contadorfilas]
+		jge findnotes
 
 finalnotas:
+	;transformar cantidad a de estudiantes por grupo a porcentajes
+	; en bubletimes se encuentra la cantidad de estudiantes totales
+
 
 
 
