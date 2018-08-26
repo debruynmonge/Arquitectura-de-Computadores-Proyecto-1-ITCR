@@ -40,7 +40,8 @@ arraynotas resb 100
 arrayestudiantes resb 100
 
 nota resb 1
-
+num1 resb 2
+num2 resb 2
 
 
 ;Las siguientes variables pertenecen a informacion del archivo configuracion
@@ -135,6 +136,18 @@ section .text
 
 	; imprimir texto con datos
 		print textdat
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 mov word [bubletimes],0d
@@ -262,12 +275,52 @@ ordenamiento:
 	cmp byte al,97d
 	je alfabetico
 
+
+
+
 ;------------------------- tipo de ordenamiento por  notas-----------------
+ print voyaqui
+
+;buscar nota en fila 1
+;cargar bytes finales en registros
+	mov word ax,[finalf1]
+	mov word bx,[finalf2]
+	;retroceder una posicion para cargar  las unidades
+	sub word ax,1d
+	sub word bx,1d
+	;cargar unidades
+	mov byte cl,[textdat+rax]
+	mov byte dl,[textdat+rbx]
+	mov byte [num1+1],cl
+	mov byte [num2+1],dl
 
 
+	;retroceder una posicion mas para cargar las decenas
+	sub word ax,1d
+        sub word bx,1d
+        ;cargar unidades
+        mov byte cl,[textdat+rax]
+        mov byte dl,[textdat+rbx]
+        mov byte [num1],cl
+        mov byte [num2],dl
 
+bbp:
+;comparacion entre numeros
+;cargar las decenas
+	mov byte al,[num1]
+	mov byte bl,[num2]
+	cmp byte al,bl
+	jg letra1menor
+	jb letra1mayor
 
-
+;si el primer digito es igual entonces hay que cargar el segundo digito y comparar
+;cargar las unidades
+        mov byte al,[num1+1]
+        mov byte bl,[num2+1]
+        cmp byte al,bl
+        jg letra1menor
+        jb letra1mayor
+;si ambos numeros son iguales se deja que se ordenen alfabeticamente
 
 
 
@@ -313,7 +366,7 @@ alfabetico:
 
 
 	;------------letra1 es menor a letra 2------------
-	; iniciof1=iniciof2
+letra1menor:	; iniciof1=iniciof2
 	mov word r12w,[iniciof2]
 	mov word [iniciof1],r12w
 
