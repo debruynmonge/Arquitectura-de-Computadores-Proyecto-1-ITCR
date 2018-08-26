@@ -519,16 +519,7 @@ bp1:		mov byte [nota],al
 	mov word [byteactual],0d
 ;buscar notas en el archivo textdat
 
-
-
-
-finalnotas:
-
-
-
-
-	 .finalprograma: ; codigo para finalizar correctamente el programa
-			; y solucionar el segmentation fault
+ solucionar el segmentation fault
 
 			mov rax,60	;cargando la llamada 60d(sys_exit)
 			mov rdi,0	;cargando 0 en rdi
