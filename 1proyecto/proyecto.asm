@@ -622,23 +622,53 @@ nospace:	mov byte [num1],al
 	jne noresi
 	sub byte cl,1d
 	mov byte al,cl
+	add byte al,1d   ;--------------------------lo acabo de agregar------------------
 noresi:;buscar el grupo al que pertenece el numero y sumarle 1
+
 		mov byte bl,[arrayestudiantes+rax]
 		add byte bl, 1d
 		mov byte [arrayestudiantes+rax],bl
 
-;verificar si ya se contaron todos las notas
-;es bubbletimes menor que contadorfilas
+	;verificar si ya se contaron todos las notas
+	;es bubbletimes menor que contadorfilas
 		mov byte al,[bubletimes]
 		cmp  byte al,[contadorfilas]
 		jge findnotes
 
+		;limpiar contadorfilas para usarlo en el siguiente loop
+		mov word [contadorfilas],0d
 finalnotas:
 	;transformar cantidad a de estudiantes por grupo a porcentajes
 	; en bubletimes se encuentra la cantidad de estudiantes totales
+	;dividir 100 entre el bubletimes
+	mov byte cl,[bubletimes]
+	mov byte al,100d
+	div byte cl
 
+	;multiplicar al por el dato
+	;cargar el dato
+        mov byte bl,[contadorfilas]
+        mov byte dl,[arrayestudiantes+rbx]
 
+a:	mul byte dl
+	;en al se encuentra la cantidad de estudiantes transformada a porcentaje
 
+	;almacenar el porcentaje
+b:	mov byte bl,[contadorfilas]
+	mov byte [arrayestudiantes+rbx],al
+
+	;comparar si ya se convirtieron todos los valores
+	;cantx alamacena la catidad de datos a convertir
+	mov byte al,[cantx]
+	cmp byte al,[contadorfilas]
+	;incrementar contador filas antes de salto
+	mov byte cl,[contadorfilas]
+	add byte cl,1d
+	mov byte [contadorfilas],cl
+	;salto
+	jg finalnotas
+
+c:
 
 
 	 .finalprograma: ; codigo para finalizar correctamente el programa
