@@ -1,5 +1,5 @@
 Nota de aprobación: 70
 Nota de reposición: 60
-Tamaño de los grupos de notas:43 
-Escala del gráfico: 15
+Tamaño de los grupos de notas: 43 
+Escala del gráfico: 20
 Ordenamiento: nlfabético

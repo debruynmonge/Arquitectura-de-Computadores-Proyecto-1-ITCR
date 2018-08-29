@@ -481,19 +481,44 @@ finaldelremplazo:
 ;Determinar numero de filas del histograma
 ;cantidad de valores en eje y=division entera(100/escala del grafico)
 ;si residuo es mayor a 1, se le suma residuo al ultimo grupo
+
 ;convirtiendo edg a decical
 	mov byte ah,[edg]
 	mov byte al,[edg+1]
+	mov byte [num1],ah
+	mov byte [num2],al
 	call _wascii2dec
 	mov byte [edgb],al
 
-;dividir 100 entre la escala
-	mov byte al, 100d
-	mov byte bl,[edgb]
-	div byte bl
-	mov byte [canty],al
-;calcular residuoy
-	mov byte [residuoy],ah
+
+;limpiwr contador canty
+mov word [canty],1d
+mov byte [arrayaxisy],0d
+;el registro cl es un acomulador, limpiarlo antes de usar
+xor rcx,rcx
+calculoejey:
+	;arrayaxisy
+	;carga el contador
+	mov word ax,[canty]
+	;carga dato a acumular
+	add byte cl,[edgb]
+	;cargar el dato el arreglo
+	mov byte [arrayaxisy+rax],cl
+	;incrementa contador
+	add word ax,1d
+	;guarda el contador en canty
+	mov word [canty],ax
+	;se compara que el dato sea menor que 100
+	cmp byte cl,100d
+	jb calculoejey
+
+
+
+
+
+
+
+
 
 
 
@@ -501,12 +526,16 @@ finaldelremplazo:
  ;leyendo el tamaño de los grupos de notas
                 mov byte ah,[textconf+80]
 		mov byte al,[textconf+81]
-                mov byte [tdgn], ah
+breakaqui1:                mov byte [tdgn], ah
 		mov byte [tdgn+1],al
+		mov byte [num1],ah
+		mov byte [num2],al
 
 	call _wascii2dec
-	mov byte [tdgnb],al
-
+breakaqui2:	mov byte [tdgnb],al
+;limpiar variables para la division
+xor rax,rax
+xor rbx,rbx
 ;dividir 100 entre el tamaño de los grupos
         mov byte al, 100d
         mov byte bl,[tdgnb]
@@ -731,32 +760,6 @@ finalnotas:
 
 
 
-;crear arreglo que contenga el eje y, arrayaxisy
-	mov byte [num1],0d
-	mov byte [nota],0d
-	mov qword rbx,0d
-	mov qword rax,0d
-ejey:
-	;traspasar nota a arreglo
-        mov byte al,[nota]
-	mov byte bl,[num1]
-        mov byte [arrayaxisy+rbx],al
-	;calcular dato
-	;cargar dato
-	mov byte bl,[edgb]
-	mov byte al,[nota]
-	add byte al,bl
-	mov byte [nota],al
-	;incrementar contador
-	mov byte bl,[num1]
-	add byte bl,1d
-	mov byte [num1],bl
-	;verificar si ya se llego al cien porciento
-	mov byte bl,[canty]
-	add byte bl,1d
-	mov byte al,[num1]
-	cmp byte al,bl
-	jb ejey
 
 
 
@@ -1036,11 +1039,11 @@ nocien2: mov byte al,[arraynotas+rbx]
         syscall
 
 
-;imprime dos espacios
+;imprime 4 espacios
 	mov rax, 1
         mov rdi, 1
-        mov rsi,dobleespacio
-        mov rdx, 2
+        mov rsi,cuatroespacios
+        mov rdx, 4
         syscall
 
 ;incrementa el contador
@@ -1098,18 +1101,24 @@ finalhistograma:
 
 _wascii2dec:
 	;convertir cada byte a decimal
-	sub byte ah,48d
+	;num 1 es las decenas
+	mov byte al, [num1]
+	mov byte bl,[num2]
 	sub byte al,48d
-	;fransferir bytes
-	mov byte bl,ah
-	mov byte dl,al
-	;multiplicar bh por 10d
-	mov byte al,10d
-	mul byte bl
-	;sumar bytes
-	add byte dl,al
-	mov byte al,dl
-
+	sub byte bl,48d
+	;multiplicar por 10 el primer numero
+	mov byte cl,al
+	add byte al,cl
+        add byte al,cl
+        add byte al,cl
+        add byte al,cl
+        add byte al,cl
+        add byte al,cl
+        add byte al,cl
+        add byte al,cl
+        add byte al,cl
+;ahora se le suma las unidades
+	add byte al,bl
 	ret
 
 _wdeci2ascii:
