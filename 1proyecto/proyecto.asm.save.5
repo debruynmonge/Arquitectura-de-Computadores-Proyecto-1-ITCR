@@ -5,14 +5,9 @@ section .data
 ; aqui se definen las varibles inicializadas
 archconf db "configuracion.txt",0	;nombre del archivo con texto
 archdat db "archivo.txt",0		;nombre del archivo con los datos
-voyaqui db 0x1b,"[44;31m","voy por aqui",10
+voyaqui db "voy por aqui",10
 
-exis db "x "
-dobleespacio db "  "
-espacioyenter db " ",10
-finalfila db "|"
-cuatroespacios db "    "
-cien db "100 "
+
 
 
 section .bss
@@ -774,307 +769,36 @@ ejey:
 
 
 ;limpiar contador
-	mov word [contadorfilas],0d
-	mov word [sizef1],0d	;este contador se utilizara en el contador de columnas
+	mov byte bl,0d
 loopimpresion:
-xor rax,rax
-xor rdx,rdx
-
-;imprimir eje y
-
-	mov word cx,[contadorfilas]
-	cmp word cx,0d
-	jne continuarejey
-	add word cx,1d
-	mov word [contadorfilas],cx
-	jmp loopimpresion
-continuarejey:
-	mov word bx,[canty]
-	sub word bx,cx
-	add word bx,1d
-	mov byte al,[arrayaxisy+rbx]
-
-;haciendo excepcion,si el numero supera el 100 se imprime un 100
-	cmp byte al,100d
-	jb nocien
-
-;imprime el cien
-	mov rax, 1
-        mov rdi, 1
-        mov rsi, cien
-        mov rdx, 4
-        syscall
-
-	mov rax, 1
-        mov rdi, 1
-        mov rsi, finalfila
-        mov rdx, 4
-        syscall
-
-
-
-
-	jmp imprimirx
-nocien: mov byte al,[arrayaxisy+rbx]
-	call _wdeci2ascii
-
-;imprime las decenas
-        mov rax, 1
-        mov rdi, 1
-        mov rsi, num1
-        mov rdx, 1
-        syscall
-
-
-;imprime las unidades
-
-        mov rax, 1
-        mov rdi, 1
-        mov rsi, num2
-        mov rdx, 1
-        syscall
-
-
-
-
-
-
-
-; imprimir espacio
-
-	mov rax, 1
-        mov rdi, 1
-        mov rsi, dobleespacio
-        mov rdx, 2
-        syscall
-
-
-;imprimir indicativo de  inicio del grafico
-
-        mov rax, 1
-        mov rdi, 1
-        mov rsi, finalfila
-        mov rdx, 2
-        syscall
-
-        mov rax, 1
-        mov rdi, 1
-        mov rsi, dobleespacio
-        mov rdx, 2
-        syscall
-
-
-
-;bucar donde imprimir x
-imprimirx:
-;cargar dato
-	mov word bx,[sizef1]	;carga la posicion dentro del arreglo
-	mov byte dl ,[arrayestudiantes+rbx]
-	mov word ax, [canty]
-	sub word ax,[contadorfilas]
-	mov byte bl,[arrayaxisy+rax]
-br22:	cmp byte dl,bl
-	jb noprintx
-
-
-	;imprimir una x y el espacio
-	mov rax, 1
-	mov rdi, 1
-	mov rsi, exis
-	mov rdx, 2
-	syscall
-
-	;imprime 4 espacios con fin de dar un mejor formato al histograma
-	mov rax, 1
-        mov rdi, 1
-        mov rsi, cuatroespacios
-        mov rdx, 4
-        syscall
-
-
-	jmp compararx
-
-noprintx:
-	;si no se va a imprimir una x entonces se imprime dos espacios para mantener el formato
-
-        mov rax, 1
-        mov rdi, 1
-        mov rsi, dobleespacio
-        mov rdx, 2
-        syscall
-
-;imprime 4 espacios con fin de dar un mejor formato al histograma
-        mov rax, 1
-        mov rdi, 1
-        mov rsi, cuatroespacios
-        mov rdx, 4
-        syscall
-
-
-compararx:
-	;comparar para saber si ya se llego al final de las columnas
-	;incrementar el contador
-	mov word ax,[sizef1]
-	add word ax, 1d
-	mov word [sizef1],ax
-	;comparar
-	cmp word ax,[cantx]
-	;si es menor salta de nuevo al loop
-	jb imprimirx
-
-	; si no es menor limpia la variable sizef1
-	mov word [sizef1],0d
-
-
- ;se imprime indicativo de final de linea
-        mov rax, 1
-        mov rdi, 1
-        mov rsi, finalfila
-        mov rdx, 1
-        syscall
-
-
-	;se imprime un enter
-	mov rax, 1
-        mov rdi, 1
-        mov rsi, espacioyenter
-        mov rdx, 2
-        syscall
-
-
-
-
-	;incrementa el contador de filas
-	mov word ax,[contadorfilas]
-	add word ax,1d
-	mov word [contadorfilas],ax
-
-	;Comparar si ya se llego al final de las filas
-	mov word bx,[canty]
-	add word bx,1d
-break1:	cmp word ax,bx
-	jb loopimpresion	;si es menor vuelve al inicio del loop
-
-
-
-
-
-;imprimir un enter por cuestiones esteticas del histograma
-;imprime un doble espacio con fin de dar un mejor formato al histograma
-        mov rax, 1
-        mov rdi, 1
-        mov rsi, espacioyenter
-        mov rdx, 2
-        syscall
-
-
-
-
-;imprimir eje x
-
-;dejar 4 espacio por no interferir en la columna con el eje y
-
-
-        mov rax, 1
-        mov rdi, 1
-        mov rsi, cuatroespacios
-        mov rdx, 4
-        syscall
-
   mov rax, 1
-        mov rdi, 1
-        mov rsi, cuatroespacios
-        mov rdx, 4
-        syscall
-
-
-
-
-
-;imprimir eje x
-;limpia contador de filas
-	mov word [contadorfilas],0d
-imprimirejex:
-	;cargar el dato a imprimir
-	mov word bx,[contadorfilas]
-	mov byte al,[arraynotas+rbx]
-	;verificar que el numero no sea mayor a cien
-	cmp  byte al, 100d
-	jb nocien2
-	;imprime un cien
-
-
-        mov rax, 1
-        mov rdi, 1
-        mov rsi,cien
-        mov rdx, 4
-        syscall
+     mov rdi, 1
+    mov rsp,100d
+     mov rsi,0x1b
+     mov rdx, 10
+     syscall
 
 
 
 
 
 
-	jmp finalhistograma
+     mov rax, 1
+     mov rdi, 1
+    mov rsp,100d
+     mov rsi,  mov rax, 1
+     mov rdi, 1
+    mov rsp,100d
+     mov rsi,voyaqui 
+     mov rdx, 10
+     syscall
 
-
-nocien2: mov byte al,[arraynotas+rbx]
-
-	call _wdeci2ascii
-
-;imprime las decenas
-        mov rax, 1
-        mov rdi, 1
-        mov rsi, num1
-        mov rdx, 1
-        syscall
-;imprime las unidades
-        mov rax, 1
-        mov rdi, 1
-        mov rsi,num2
-        mov rdx, 1
-        syscall
-
-
-;imprime dos espacios
-	mov rax, 1
-        mov rdi, 1
-        mov rsi,dobleespacio
-        mov rdx, 2
-        syscall
-
-;incrementa el contador
-	mov word ax,[contadorfilas]
-	add word ax,1d
-	mov word [contadorfilas],ax
-
-;verifica si ya se recorrio todo el eje
-	cmp word ax,[cantx]
-	jb imprimirejex
-
-
-;aqui termina el histograma
-finalhistograma:
-;se imprime un enter y se acaba el programa
-
-	mov rax, 1
-        mov rdi, 1
-        mov rsi,espacioyenter
-        mov rdx, 2
-        syscall
+     mov rdx, 13
+     syscall
 
 
 
 
-
-
-
-;imprime un doble espacio con fin de dar un mejor formato al histograma
-        mov rax, 1
-        mov rdi, 1
-        mov rsi, dobleespacio
-        mov rdx, 2
-        syscall
 
 
 
@@ -1114,17 +838,10 @@ _wascii2dec:
 
 _wdeci2ascii:
 		;recibe en al un byte en decimal y lo transforma a ascii
-		;dividir el numero entre 10
-		mov byte cl,al
-		mov byte bl,10d
-		div byte bl
-		;resultado en al
-		add byte al,48d
-		mov byte [num1],al
-		;calcular residuo
-		sub byte al,48d
-		mul byte bl
-		sub byte cl,al
-		add byte cl,48d
-		mov byte [num2],cl
+		;el resultado se encuentra en ah y al
+		
+		
+		
+		
+		
 		ret
