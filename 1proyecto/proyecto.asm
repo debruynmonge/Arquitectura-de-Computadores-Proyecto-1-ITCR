@@ -777,7 +777,7 @@ finalnotas:
 
 
 ;limpiar contador
-	mov word [contadorfilas],0d
+	mov word [contadorfilas],1d
 	mov word [sizef1],0d	;este contador se utilizara en el contador de columnas
 loopimpresion:
 xor rax,rax
@@ -785,13 +785,14 @@ xor rdx,rdx
 
 ;imprimir eje y
 
-	mov word cx,[contadorfilas]
-	cmp word cx,0d
+	mov word cx,[contadorfilas] ;carga el contador que indica que fila esta imprimiendo
+	cmp word cx,1d		;compara si es la primera fila a imprimir
 	jne continuarejey
 	add word cx,1d
 	mov word [contadorfilas],cx
 	jmp loopimpresion
 continuarejey:
+	; si no es  la fila cero, entonces continua con la impresion normal del eje
 	mov word bx,[canty]
 	sub word bx,cx
 	add word bx,1d
