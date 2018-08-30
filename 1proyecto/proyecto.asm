@@ -13,6 +13,11 @@ espacioyenter db " ",10
 finalfila db "|"
 cuatroespacios db "    "
 cien db "100 "
+verde db 0x1b,"[32m"
+rojo db 0x1b,"[31m"
+blanco db 0x1b,"[37m"
+amarillo db 0x1b,"[33m"
+
 
 
 section .bss
@@ -316,7 +321,7 @@ ordenamiento:
         mov byte [num1],cl
         mov byte [num2],dl
 
-bbp:
+
 ;comparacion entre numeros
 ;cargar las decenas
 	mov byte al,[num1]
@@ -526,13 +531,13 @@ calculoejey:
  ;leyendo el tamaño de los grupos de notas
                 mov byte ah,[textconf+80]
 		mov byte al,[textconf+81]
-breakaqui1:                mov byte [tdgn], ah
+                mov byte [tdgn], ah
 		mov byte [tdgn+1],al
 		mov byte [num1],ah
 		mov byte [num2],al
 
 	call _wascii2dec
-breakaqui2:	mov byte [tdgnb],al
+	mov byte [tdgnb],al
 ;limpiar variables para la division
 xor rax,rax
 xor rbx,rbx
@@ -588,7 +593,7 @@ asignarnotas:
 		;asi se obtiene limite actual del grupo
 		mov byte al,dl
 		mul byte bl
-bp1:		mov byte [nota],al
+		mov byte [nota],al
 		mov byte al,dl
 		sub byte al,1d
 		mov byte r14b,[nota]
@@ -762,20 +767,6 @@ finalnotas:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ;limpiar contador
 	mov word [contadorfilas],1d
 	mov word [sizef1],0d	;este contador se utilizara en el contador de columnas
@@ -873,13 +864,94 @@ nocien: mov byte al,[arrayaxisy+rbx]
 imprimirx:
 ;cargar dato
 	mov word bx,[sizef1]	;carga la posicion dentro del arreglo
-	mov byte dl ,[arrayestudiantes+rbx]
-	mov word ax, [canty]
-	sub word ax,[contadorfilas]
-	mov byte bl,[arrayaxisy+rax]
-br22:	cmp byte dl,bl
+	mov byte dl ,[arrayestudiantes+rbx]	;carga el dato para comparar
+	mov word ax, [canty]		;carga el limite del loop
+	sub word ax,[contadorfilas]	;calcula la posicion que actualmente va a imprimir
+	mov byte bl,[arrayaxisy+rax]	;carga el dato a  <imprimir
+	cmp byte dl,bl			;compara si debe o no imprimir una x en el histograma
 	jb noprintx
 
+
+
+
+
+
+
+
+	;compara si la x imprimir se encuentra antes de la nota de aprobacion
+	;carga la nota de aprobacion
+	mov byte ah,[nda]
+	mov byte al,[nda+1]
+	mov byte [num1],ah
+	mov byte [num2],al
+	;convierte la nota a decimal para poder comparar
+	call _wascii2dec
+bp4:	mov word bx,[sizef1]	;carga la posicion actual  en el arreglo de estudiantes
+	mov byte cl,[arraynotas+rbx]
+	;compara si la nota es menor a la nota de aprobacion
+bp3:	cmp byte cl,al
+	jg letrasverdes	; si es mayor a la nota de reposicion salta
+
+	;si la nota es inferior a la nota de reposicion se compara para saber
+	;si esta en el intervalo de la nota de reposicion o no
+	;si este dato es menor que la nota de reposicion
+	;se imprimen letras rojas
+bp1:	mov byte ah,[ndr]
+	mov byte al,[ndr+1]
+	mov byte [num1],ah
+	mov byte [num2],al
+
+	call _wascii2dec
+	mov word bx,[sizef1]
+	mov byte cl,[arraynotas+rbx]
+bp2:	cmp byte al,cl
+	jb letrasamarillas
+
+;se envia el comando a la pantalla para que cambie el color de la letra a impr$
+        mov rax, 1
+        mov rdi, 1
+        mov rsi, rojo
+        mov rdx, 5
+        syscall
+
+
+	jmp imprimircolor
+
+letrasamarillas:
+
+;se envia el comando a la pantalla para que cambie el color de la letra a impr$
+        mov rax, 1
+        mov rdi, 1
+        mov rsi, amarillo
+        mov rdx, 5
+        syscall
+
+	jmp imprimircolor
+
+
+letrasverdes:
+
+ ;se envia el comando a la pantalla para que cambie el color de la letra a imprimir
+        mov rax, 1
+        mov rdi, 1
+        mov rsi, verde
+        mov rdx, 5
+        syscall
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+imprimircolor:
 
 	;imprimir una x y el espacio
 	mov rax, 1
@@ -916,6 +988,15 @@ noprintx:
 
 
 compararx:
+
+;se envia el comando a la pantalla para que cambie el color de la letra a impr$
+        mov rax, 1
+        mov rdi, 1
+        mov rsi, blanco
+        mov rdx, 5
+        syscall
+
+
 	;comparar para saber si ya se llego al final de las columnas
 	;incrementar el contador
 	mov word ax,[sizef1]
@@ -956,7 +1037,7 @@ compararx:
 	;Comparar si ya se llego al final de las filas
 	mov word bx,[canty]
 	add word bx,1d
-break1:	cmp word ax,bx
+	cmp word ax,bx
 	jb loopimpresion	;si es menor vuelve al inicio del loop
 
 
