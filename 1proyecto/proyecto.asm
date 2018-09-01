@@ -21,33 +21,33 @@ amarillo db 0x1b,"[33m"
 
 
 section .bss
-; aqui se se reservan espacios para variables sin definir tu valor inicial
+; aqui se se reservan espacios para variables sin definir su valor inicial
 
 textconf resb 150 ; reserva espacio para el texto de configuracion
 textdat resb 1000 ; reserva espacio para el texto de datos
 ttc resb 150  ; reserva espacio para almacenar el texto de configuracion
 ttd resb 1000 ; reserva espacio para almacenar el texto con los datos
 
-byteactual resw 1
-finalf1 resw 1
-iniciof1 resw 1
-iniciof2 resw 1
-finalf2 resw 1
+byteactual resw 1	; esta variable es un contador que permite indicar que posicion se esta leyendo
+finalf1 resw 1		;indica la posicion relativa donde se encuentra el final de la fila 1
+iniciof1 resw 1		;indica la posicion relativa donde inicia la fila 1
+iniciof2 resw 1		;indica la posicion relativa donde inicia la fila 2
+finalf2 resw 1		;indica la posicion relaiva donde finaliza la fila 2
 
 
-bytefinaltext resw 1
+bytefinaltext resw 1	;almacena la posicion relativa donde finaliza el documento con los datos
 contadorletras resw 1
 copiadorfilas resw 1
 
-sizef1 resw 1
-sizef2 resw 1
+sizef1 resw 1		;almacena  el tamaño de la fila 1
+sizef2 resw 1		;almacena el tamaño de la fila 2
 
 bubletimes resw 1
 contadorfilas resw 1
 
 
-arraynotas resb 100
-arrayestudiantes resb 100
+arraynotas resb 100		;almacena las notas en el eje x
+arrayestudiantes resb 100	;alcena la cantidad de estudiantes por grupo de notas
 
 
 nota resb 1
@@ -64,10 +64,12 @@ todaslasnotas resb 100
 	edg resb 2 ;esta variable almacena la edg = escala del grafico
 	tdo resb 1; esta variable almacena el tdo = tipo de ordenamiento
 
+;las siguientes variables se utilizan para realizar las comparaciones
+
 	letra1 resb 1
 	letra2 resb 1
-	copiafila1 resb 40
-	copiafila2 resb 40
+	copiafila1 resb 40	;almacena la fila 1
+	copiafila2 resb 40	;almacena la fila 2
 
 
 
@@ -79,7 +81,7 @@ todaslasnotas resb 100
 	residuox resb 1
 	tdgnb resb 1
 
-	arrayaxisy resb 100
+	arrayaxisy resb 100	;guarda los valores presentes en el eje y
 
 
 
@@ -159,15 +161,7 @@ section .text
 
 
 
-
-
-
-
-
-
-
-
-mov word [bubletimes],0d
+mov word [bubletimes],0d	;se limpia la variable que se va a utilizar como contador
 limpiarvariables:
 ;limpiar variables a utilizar
 mov word [byteactual],0d
@@ -227,10 +221,10 @@ bublesort:
 
 		mov word [iniciof2],cx
 
-;incrementa contador filas
-mov word r11w,[contadorfilas]
-add word r11w, 1d
-mov word [contadorfilas],r11w
+	;incrementa contador filas
+		mov word r11w,[contadorfilas]
+		add word r11w, 1d
+		mov word [contadorfilas],r11w
 
 
 
@@ -252,7 +246,7 @@ Efila2:		mov word ax,[byteactual]
 		add word ax,1d
 		mov word [byteactual],ax
 
-mov byte r14b,bl
+;mov byte r14b,bl  ------No esta haciendo nada---------
 
 ;es la letra siguiente igual al final del archivo?
 
@@ -288,9 +282,16 @@ antesdeordenamiento:
 	;-----------------------ordenamiento---------------
 ordenamiento:
 	;Es tipo de ordenamiento alfabetico
-	mov byte [tdo],al
-	cmp byte al,97d
+	;comprueba si la letra inicial es una A mayuscula
+	mov byte al,[tdo]
+	cmp byte al,65d
 	je alfabetico
+	;comprueba si la letra inicial es una a minuscuala
+        mov byte al,[tdo]
+        cmp byte al,97d
+        je alfabetico
+
+
 
 
 
