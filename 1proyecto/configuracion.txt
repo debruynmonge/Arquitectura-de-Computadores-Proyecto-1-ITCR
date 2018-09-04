@@ -1,5 +1,5 @@
 Nota de aprobación: 70
 Nota de reposición: 60
 Tamaño de los grupos de notas: 15 
-Escala del gráfico: 05
+Escala del gráfico: 02
 Ordenamiento: Alfabético

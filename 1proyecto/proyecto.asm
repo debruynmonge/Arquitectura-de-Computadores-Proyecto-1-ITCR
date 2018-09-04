@@ -347,7 +347,6 @@ alfabetico:
 
 	;cargar en letra1 lo que esta en la direccion textdat+iniciof1+ contadorletras
 		mov word ax,[iniciof1]
-;aqui hay un error segun el debugeer
 		add word ax,[contadorletras]
 		mov byte cl,[textdat+rax]
 		mov byte [letra1],cl
@@ -384,10 +383,13 @@ alfabetico:
 
 
 	;------------letra1 es menor a letra 2------------
-letra1menor:	; iniciof1=iniciof2
+letra1menor:
+	;actualiza el inicio para el siguiente loop
+	; iniciof1=iniciof2
 	mov word r12w,[iniciof2]
 	mov word [iniciof1],r12w
 
+	;posicionar el la posicion actual en el inicio de la nueva fila 2
 	;byteactual=iniciof2
 	mov word [byteactual],r12w
 
@@ -478,7 +480,7 @@ finaldelremplazo:
 	cmp word ax,bx
 	jb limpiarvariables
 
-;hasta aqui todo bien, logra ordenar en orden alfabetico la lista
+
 
 
 
@@ -536,12 +538,13 @@ calculoejey:
 		mov byte [tdgn+1],al
 		mov byte [num1],ah
 		mov byte [num2],al
+		call _wascii2dec
+		mov byte [tdgnb],al
 
-	call _wascii2dec
-	mov byte [tdgnb],al
+
 ;limpiar variables para la division
-xor rax,rax
-xor rbx,rbx
+		xor rax,rax
+		xor rbx,rbx
 ;dividir 100 entre el tamaño de los grupos
         mov byte al, 100d
         mov byte bl,[tdgnb]
@@ -554,7 +557,7 @@ xor rbx,rbx
 ; si hay residuo se agrega un nuevo grupo de notas
 	mov byte bl,[residuox]
 	cmp bl,0d
-	je residuo2 
+	je residuo2
 	mov byte al,[cantx]
 	add byte al,1d
 	mov byte [cantx],al
