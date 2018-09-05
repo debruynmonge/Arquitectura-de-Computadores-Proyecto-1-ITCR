@@ -499,7 +499,7 @@ finaldelremplazo:
 	mov byte [edgb],al
 
 
-;limpiwr contador canty
+;limpiar contador canty
 mov word [canty],1d
 mov byte [arrayaxisy],0d
 ;el registro cl es un acomulador, limpiarlo antes de usar
@@ -579,7 +579,7 @@ finalresiduo:
 
 ;limpiar vector notas y estudiantes
 	mov byte dl,0d
-limpiarnotas:
+limpiarnotas:	; aqui se limpia el arreglo que va a contener las notas y el que va a contener los estudiantes por nota
 		mov byte [arraynotas+rdx],0d
 		mov byte [arrayestudiantes+rdx],0d
 		cmp byte dl,100d
@@ -680,7 +680,7 @@ nospace:	mov byte [num1],al
 ;------------------------contar cuantas notas existen por grupo de notas-----------------
 ;limpiar registro r10b, para ser utilizado como contador
 mov byte r10b,0d
-;--------------------------------------------aqui hay algo malo-------------------------------
+
 contarnotas:
 		;cargar nota a comparar
 		mov word bx,[contadorfilas]
@@ -1203,7 +1203,7 @@ _wascii2dec:
         add byte al,cl
         add byte al,cl
         add byte al,cl
-;ahora se le suma las unidades
+	;ahora se le suma las unidades
 	add byte al,bl
 	ret
 
